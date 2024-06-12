@@ -6,7 +6,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-geist-sans)", ...fontFamily.sans],
+       poppins:["var(--font-poppins)", "sans-serif"],
+       montserrat:["var(--font-montserrat)", "sans-serif"]
       },
     },
   },
