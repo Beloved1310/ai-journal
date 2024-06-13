@@ -63,6 +63,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
     posts         Post[]
+    Entry         Entry[]
 }
 
 model VerificationToken {
@@ -71,4 +72,13 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Entry {
+    id          String   @id @default(cuid())
+    content     String
+    userId      String
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    dateCreated DateTime @default(now())
+    moodRating  Int?
 }
