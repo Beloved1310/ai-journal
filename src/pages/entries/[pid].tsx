@@ -1,12 +1,28 @@
+import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import moment from "moment";
+import { TrashIcon } from "@heroicons/react/24/solid";
 
 const Entry = () => {
   const { status: sessionStatus } = useSession();
-  const { replace } = useRouter();
+  const { replace, query } = useRouter();
+  const entryId = Array.isArray(query.pid) ? query.pid[0] : query.pid;
 
+  const { data: entryData, status: entryStatus } =
+    api.journalling.getEntryById.useQuery(
+      { id: entryId! },
+      {
+        enabled: entryId !== undefined,
+      },
+    );
+  const { mutate: deletionMutation } = api.journalling.deleteEntry.useMutation({
+    onSuccess() {
+      replace("/entries");
+    },
+  });
   useEffect(() => {
     if (sessionStatus === "unauthenticated") {
       replace("/");
@@ -18,7 +34,26 @@ const Entry = () => {
       <Head>
         <title>Entry</title>
       </Head>
-      <section className="mt-32 flex flex-col justify-center gap-10"></section>
+      <section className="mt-32 flex flex-col justify-center gap-10">
+        {entryData !== null && (
+          <div className="mx-auto flex w-1/2 flex-col gap-5 ">
+            <div className=" item-center flex flex-row justify-between">
+              <h1 className="font-poppins text-3xl font-extrabold text-gray-50">
+                {moment(entryData?.dateCreated).format("MMMM Do YYYY")}
+              </h1>
+              <button
+                className="rounded-sm bg-gradient-to-br from-gray-700 to-gray-800 p-2"
+                onClick={() => deletionMutation({ id: entryId! })}
+              >
+                <TrashIcon width={25} className="text-gray-50" />
+              </button>
+            </div>
+            <p className="whitespace-pre-line bg-gray-900 font-montserrat text-lg text-gray-50">
+              {entryData?.content}
+            </p>
+          </div>
+        )}
+      </section>
     </>
   );
 };
